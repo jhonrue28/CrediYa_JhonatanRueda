@@ -30,7 +30,7 @@ public class MenuPrincipal {
                     MenuPago.mostrar();
                     break;
                 case 5:
-                    // MenuReportes.mostrar();
+                    MenuReportes.mostrar();
                     break;
                 case 6:
                     System.out.println("¡Gracias por usar CrediYa! Hasta luego.");

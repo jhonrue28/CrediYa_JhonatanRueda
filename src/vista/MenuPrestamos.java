@@ -6,6 +6,8 @@ import modelo.Clases.Prestamo;
 import modelo.DAO.ClienteDAO;
 import modelo.DAO.EmpleadoDAO;
 import modelo.DAO.PrestamoDAO;
+import modelo.Servicios.PrestamoServicio;
+import modelo.DAO.PagoDAO;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ public class MenuPrestamos {
     private static final PrestamoDAO prestamoDAO = new PrestamoDAO();
     private static final ClienteDAO clienteDAO = new ClienteDAO();
     private static final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
+    private static final PrestamoServicio prestamoServicio = new PrestamoServicio();
+    private static final PagoDAO pagoDAO = new PagoDAO();
 
     public static void mostrar() {
         int opcion;
@@ -113,6 +117,26 @@ public class MenuPrestamos {
 
     private static void crearPrestamo() {
         System.out.println("\n--- Crear Nuevo Préstamo ---");
+
+        double monto = ConsolUtils.leerDouble("Monto: ");
+        double interes = ConsolUtils.leerDouble("Interés (%): ");
+        int cuotas = ConsolUtils.leerEntero("Número de cuotas: ");
+
+        if (monto <= 0) {
+            System.out.println("El monto debe ser mayor que 0.");
+            return;
+        }
+
+        if (interes < 0) {
+            System.out.println("El interés no puede ser negativo.");
+            return;
+        }
+
+        if (cuotas <= 0) {
+            System.out.println("El número de cuotas debe ser mayor que 0.");
+            return;
+        }
+
         Cliente cliente = seleccionarCliente();
         if (cliente == null) {
             return;
@@ -123,11 +147,8 @@ public class MenuPrestamos {
             return;
         }
 
-        double monto = ConsolUtils.leerDouble("Monto: ");
-        double interes = ConsolUtils.leerDouble("Interés (%): ");
-        int cuotas = ConsolUtils.leerEntero("Número de cuotas: ");
-
         Prestamo nuevo = new Prestamo(cliente.getId(), empleado.getId(), monto, interes, cuotas);
+        prestamoServicio.calcularDatosPrestamo(nuevo);
 
         if (prestamoDAO.guardar(nuevo)) {
             System.out.println("¡Préstamo creado con éxito para " + cliente.getNombre()
@@ -250,6 +271,13 @@ public class MenuPrestamos {
             }
         }
 
+        prestamoServicio.calcularMontoTotal(prestamo);
+        prestamoServicio.calcularCuotaMensual(prestamo);
+        prestamoServicio.calcularSaldoPendiente(
+            prestamo,
+            pagoDAO.obtenerPorPrestamo(prestamo.getId())
+        );
+
         if (prestamoDAO.actualizar(prestamo)) {
             System.out.println("¡Préstamo actualizado exitosamente!");
         } else {
@@ -325,16 +353,23 @@ public class MenuPrestamos {
     }
 
     private static void mostrarPrestamo(Prestamo p) {
-        System.out.printf(
-                "ID Préstamo: %d | ID Cliente: %d | ID Empleado: %d | Monto: $%.2f | Interés: %.1f%% | Cuotas: %d | Estado: %s | Fecha inicio: %s%n",
-                p.getId(),
-                p.getIdCliente(),
-                p.getIdEmpleado(),
-                p.getMonto(),
-                p.getInteres(),
-                p.getCuotas(),
-                p.getEstado(),
-                p.getFechaInicio()
-        );
+    System.out.printf(
+            "ID Préstamo: %d | ID Cliente: %d | ID Empleado: %d | Monto: $%.2f | Interés: %.1f%% | Cuotas: %d | Estado: %s | Fecha inicio: %s%n",
+            p.getId(),
+            p.getIdCliente(),
+            p.getIdEmpleado(),
+            p.getMonto(),
+            p.getInteres(),
+            p.getCuotas(),
+            p.getEstado(),
+            p.getFechaInicio()
+    );
+
+    System.out.printf(
+            "Monto total: $%.2f | Cuota mensual: $%.2f | Saldo pendiente: $%.2f%n",
+            p.getMontoTotal(),
+            p.getCuotaMensual(),
+            p.getSaldoPendiente()
+    );
     }
 }

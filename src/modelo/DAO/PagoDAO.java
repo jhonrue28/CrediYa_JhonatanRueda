@@ -11,14 +11,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Persistencia.PersistenciaArchivo;
 
 public class PagoDAO {
 
     public boolean guardar(Pago pago) {
+        PersistenciaArchivo persistenciaArchivo = new PersistenciaArchivo();
+
         String sql = "INSERT INTO pagos (prestamo_id, fecha_pago, monto) VALUES (?, ?, ?)";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             Date fechaPago = pago.getFechaPago();
             if (fechaPago == null) {
@@ -37,6 +40,12 @@ public class PagoDAO {
                         pago.setId(keys.getInt(1));
                     }
                 }
+                String linea = pago.getId()
+                    + "|" + pago.getIdPrestamo()
+                    + "|" + pago.getFechaPago()
+                    + "|" + pago.getMonto();
+
+                persistenciaArchivo.guardarPago(linea);
                 return true;
             }
             return false;
@@ -51,8 +60,8 @@ public class PagoDAO {
         String sql = "SELECT id, prestamo_id, fecha_pago, monto FROM pagos";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 lista.add(mapearPago(rs));
@@ -67,7 +76,7 @@ public class PagoDAO {
         String sql = "SELECT id, prestamo_id, fecha_pago, monto FROM pagos WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -87,7 +96,7 @@ public class PagoDAO {
         String sql = "SELECT id, prestamo_id, fecha_pago, monto FROM pagos WHERE prestamo_id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, idPrestamo);
             try (ResultSet rs = ps.executeQuery()) {
@@ -105,7 +114,7 @@ public class PagoDAO {
         String sql = "UPDATE pagos SET prestamo_id = ?, fecha_pago = ?, monto = ? WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             Date fechaPago = pago.getFechaPago();
             if (fechaPago == null) {
@@ -128,7 +137,7 @@ public class PagoDAO {
         String sql = "DELETE FROM pagos WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;

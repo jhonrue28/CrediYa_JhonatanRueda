@@ -10,14 +10,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Persistencia.PersistenciaArchivo;
 
 public class EmpleadoDAO {
 
     public static boolean guardar(Empleado empleado) {
+        PersistenciaArchivo persistenciaArchivo = new PersistenciaArchivo();
         String sql = "INSERT INTO empleados (nombre, documento, correo, rol, salario) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, empleado.getNombre());
             stmt.setString(2, empleado.getDocumento());
@@ -32,6 +34,16 @@ public class EmpleadoDAO {
                         empleado.setId(keys.getInt(1));
                     }
                 }
+
+                String linea = empleado.getId()
+                        + "|" + empleado.getNombre()
+                        + "|" + empleado.getDocumento()
+                        + "|" + empleado.getCorreo()
+                        + "|" + empleado.getRol()
+                        + "|" + empleado.getSalario();
+
+                persistenciaArchivo.guardarEmpleado(linea);
+
                 return true;
             }
             return false;
@@ -46,8 +58,8 @@ public class EmpleadoDAO {
         String sql = "SELECT id, nombre, documento, correo, rol, salario FROM empleados";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 lista.add(mapearEmpleado(rs));
@@ -63,7 +75,7 @@ public class EmpleadoDAO {
         String sql = "SELECT id, nombre, documento, correo, rol, salario FROM empleados WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -81,7 +93,7 @@ public class EmpleadoDAO {
         String sql = "SELECT id, nombre, documento, correo, rol, salario FROM empleados WHERE documento = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, documento);
             try (ResultSet rs = ps.executeQuery()) {
@@ -99,7 +111,7 @@ public class EmpleadoDAO {
         String sql = "UPDATE empleados SET nombre = ?, documento = ?, correo = ?, rol = ?, salario = ? WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, empleado.getNombre());
             ps.setString(2, empleado.getDocumento());
@@ -119,7 +131,7 @@ public class EmpleadoDAO {
         String sql = "DELETE FROM empleados WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;

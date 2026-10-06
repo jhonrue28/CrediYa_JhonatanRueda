@@ -1,12 +1,11 @@
 package vista;
 
-import com.sun.tools.jconsole.JConsoleContext;
+import java.util.List;
 import modelo.Clases.Empleado;
 import modelo.DAO.EmpleadoDAO;
 
-import static vista.ConsolUtils.seleccionarRol;
-
 public class MenuEmpleado {
+    private static final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
     public static void mostrar() {
         int opcion;
         do {
@@ -56,6 +55,23 @@ public class MenuEmpleado {
 
     private static void consultarEmpleados() {
         System.out.println("\n--- Listado de Empleados ---");
-        // Llamada al controlador para obtener y mostrar lista
-    }
+        
+        List<Empleado> empleados = empleadoDAO.obtenerTodos();
+
+        if (empleados.isEmpty()) {
+            System.out.println("No hay empleados registrados.");
+            return;
+        }
+
+        for (Empleado empleado : empleados) {
+            System.out.println(
+                    "ID: " + empleado.getId()
+                    + " | Nombre: " + empleado.getNombre()
+                    + " | Documento: " + empleado.getDocumento()
+                    + " | Correo: " + empleado.getCorreo()
+                    + " | Rol: " + empleado.getRol()
+                    + " | Salario: $" + empleado.getSalario()
+            );
+        }
+        }
 }

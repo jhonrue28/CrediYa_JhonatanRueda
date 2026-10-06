@@ -45,7 +45,7 @@ public class MenuCliente {
 
         Cliente nuevoCliente = new Cliente(nombre, documento, correo, telefono);
 
-        if (clienteDAO.guardar(nuevoCliente)) {
+        if (ClienteDAO.guardar(nuevoCliente)) {
             System.out.println("¡Cliente registrado con éxito!");
         } else {
             System.out.println("Error al guardar el cliente.");

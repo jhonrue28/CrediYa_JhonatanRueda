@@ -10,14 +10,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Persistencia.PersistenciaArchivo;
 
 public class ClienteDAO {
 
     public static boolean guardar(Cliente cliente) {
+        PersistenciaArchivo persistenciaArchivo = new PersistenciaArchivo();
         String sql = "INSERT INTO clientes (nombre, documento, correo, telefono) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, cliente.getNombre());
             stmt.setString(2, cliente.getDocumento());
@@ -31,6 +33,15 @@ public class ClienteDAO {
                         cliente.setId(keys.getInt(1));
                     }
                 }
+
+                String linea = cliente.getId()
+                        + "|" + cliente.getNombre()
+                        + "|" + cliente.getDocumento()
+                        + "|" + cliente.getCorreo()
+                        + "|" + cliente.getTelefono();
+
+                persistenciaArchivo.guardarCliente(linea);
+
                 return true;
             }
             return false;
@@ -45,8 +56,8 @@ public class ClienteDAO {
         String sql = "SELECT id, nombre, documento, correo, telefono FROM clientes";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 lista.add(mapearCliente(rs));
@@ -62,7 +73,7 @@ public class ClienteDAO {
         String sql = "SELECT id, nombre, documento, correo, telefono FROM clientes WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -80,7 +91,7 @@ public class ClienteDAO {
         String sql = "SELECT id, nombre, documento, correo, telefono FROM clientes WHERE documento = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, documento);
             try (ResultSet rs = ps.executeQuery()) {
@@ -98,7 +109,7 @@ public class ClienteDAO {
         String sql = "UPDATE clientes SET nombre = ?, documento = ?, correo = ?, telefono = ? WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, cliente.getNombre());
             ps.setString(2, cliente.getDocumento());
@@ -117,7 +128,7 @@ public class ClienteDAO {
         String sql = "DELETE FROM clientes WHERE id = ?";
 
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
@@ -134,7 +145,7 @@ public class ClienteDAO {
                 + "WHERE c.documento = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, documento);
             try (ResultSet rs = stmt.executeQuery()) {

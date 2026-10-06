@@ -4,6 +4,7 @@ import modelo.Clases.Pago;
 import modelo.Clases.Prestamo;
 import modelo.DAO.PagoDAO;
 import modelo.DAO.PrestamoDAO;
+import modelo.Servicios.PrestamoServicio;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class MenuPago {
 
     private static final PagoDAO pagoDAO = new PagoDAO();
     private static final PrestamoDAO prestamoDAO = new PrestamoDAO();
+    private static final PrestamoServicio prestamoServicio = new PrestamoServicio();
 
     public static void mostrar() {
         int opcion;
@@ -65,10 +67,29 @@ public class MenuPago {
         }
 
         double monto = ConsolUtils.leerDouble("Monto del pago: ");
+
+        if (monto <= 0) {
+            System.out.println("El monto del pago debe ser mayor que 0.");
+            return;
+        }
+
+        if (monto > prestamo.getSaldoPendiente()) {
+            System.out.printf(
+                    "El pago no puede ser mayor al saldo pendiente: $%.2f%n",
+                    prestamo.getSaldoPendiente()
+            );
+            return;
+        }
+
         Pago nuevo = new Pago(idPrestamo, monto);
 
         if (pagoDAO.guardar(nuevo)) {
+            List<Pago> pagos = pagoDAO.obtenerPorPrestamo(idPrestamo);
+            prestamoServicio.calcularSaldoPendiente(prestamo, pagos);
+
             System.out.println("¡Pago registrado con éxito! ID generado: " + nuevo.getId());
+            System.out.printf("Saldo pendiente: $%.2f%n", prestamo.getSaldoPendiente());
+            System.out.println("Estado del préstamo: " + prestamo.getEstado());
         } else {
             System.out.println("Error al registrar el pago en la base de datos.");
         }
