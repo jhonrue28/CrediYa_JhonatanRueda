@@ -1,6 +1,7 @@
 package modelo.DAO;
 
 import modelo.Clases.Cliente;
+import modelo.Clases.Prestamo;
 import modelo.Persistencia.ConexionBD;
 
 import java.sql.Connection;
@@ -90,5 +91,60 @@ public class ClienteDAO {
         } catch (SQLException e) {
             System.err.println("Error al consultar los préstamos del cliente: " + e.getMessage());
         }
+    }
+    // 1. Buscar cliente por ID
+    public Cliente obtenerPorId(int id) {
+        String sql = "SELECT c.id, p.nombre, p.documento, p.correo, p.telefono " +
+                "FROM clientes c " +
+                "JOIN persona p ON c.id_persona = p.id " +
+                "WHERE c.id = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Cliente(
+                            rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("documento"),
+                            rs.getString("correo"),
+                            rs.getString("telefono")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar cliente por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // 2. Buscar cliente por Documento
+    public Cliente obtenerPorDocumento(String documento) {
+        String sql = "SELECT c.id, p.nombre, p.documento, p.correo, p.telefono " +
+                "FROM clientes c " +
+                "JOIN persona p ON c.id_persona = p.id " +
+                "WHERE p.documento = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, documento);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Cliente(
+                            rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("documento"),
+                            rs.getString("correo"),
+                            rs.getString("telefono")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar cliente por documento: " + e.getMessage());
+        }
+        return null;
     }
 }

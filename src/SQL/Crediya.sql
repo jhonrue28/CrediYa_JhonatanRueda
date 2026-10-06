@@ -40,3 +40,4 @@ CREATE TABLE pagos (
     FOREIGN KEY (prestamo_id) REFERENCES prestamos(id)
 );
 
+

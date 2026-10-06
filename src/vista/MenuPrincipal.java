@@ -18,13 +18,13 @@ public class MenuPrincipal {
 
             switch (opcion) {
                 case 1:
-                    MenuEmpleado.mostrar(); // Llama al submenú de Empleados
+                    MenuEmpleado.mostrar();
                     break;
                 case 2:
                     MenuCliente.mostrar();
                     break;
                 case 3:
-                    // MenuPrestamo.mostrar();
+                    MenuPrestamos.mostrar();
                     break;
                 case 4:
                     // MenuPago.mostrar();
