@@ -27,7 +27,7 @@ public class MenuPrincipal {
                     MenuPrestamos.mostrar();
                     break;
                 case 4:
-                    // MenuPago.mostrar();
+                    MenuPago.mostrar();
                     break;
                 case 5:
                     // MenuReportes.mostrar();
