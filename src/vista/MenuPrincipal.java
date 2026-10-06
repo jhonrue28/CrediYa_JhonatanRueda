@@ -1,6 +1,6 @@
 package vista;
 
-public class menuPrincipal {
+public class MenuPrincipal {
     public void iniciar() {
         int opcion;
         do {
@@ -14,14 +14,14 @@ public class menuPrincipal {
             System.out.println("5. Reportes");
             System.out.println("6. Salir");
 
-            opcion = ConsoleUtils.leerEntero("Seleccione una opción: ");
+            opcion = ConsolUtils.leerEntero("Seleccione una opción: ");
 
             switch (opcion) {
                 case 1:
                     MenuEmpleado.mostrar(); // Llama al submenú de Empleados
                     break;
                 case 2:
-                    // MenuCliente.mostrar();
+                    MenuCliente.mostrar();
                     break;
                 case 3:
                     // MenuPrestamo.mostrar();

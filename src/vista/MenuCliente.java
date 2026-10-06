@@ -1,8 +1,10 @@
 package vista;
 import java.util.List;
+import modelo.Clases.Cliente;
+import modelo.DAO.ClienteDAO;
 
 public class MenuCliente {
-    private static ClienteDAO clienteDAO = new ClienteDAO();
+    private static final ClienteDAO clienteDAO = new ClienteDAO();
 
     public static void mostrar() {
         int opcion = 0;

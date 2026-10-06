@@ -1,4 +1,4 @@
-package modelo.dao;
+package modelo.Persistencia;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
