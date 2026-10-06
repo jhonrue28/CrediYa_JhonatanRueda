@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class EmpleadoDAO {
         String sql = "INSERT INTO empleados (nombre, documento, correo, rol, salario) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.obtenerConexion();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, empleado.getNombre());
             stmt.setString(2, empleado.getDocumento());
@@ -24,8 +25,16 @@ public class EmpleadoDAO {
             stmt.setString(4, empleado.getRol());
             stmt.setDouble(5, empleado.getSalario());
 
-            return stmt.executeUpdate() > 0;
-
+            int filas = stmt.executeUpdate();
+            if (filas > 0) {
+                try (ResultSet keys = stmt.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        empleado.setId(keys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
         } catch (SQLException e) {
             System.err.println("Error al guardar el empleado en la BD: " + e.getMessage());
             return false;
@@ -41,21 +50,93 @@ public class EmpleadoDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Empleado emp = new Empleado(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        rs.getString("documento"),
-                        rs.getString("correo"),
-                        rs.getString("rol"),
-                        rs.getDouble("salario")
-                );
-                lista.add(emp);
+                lista.add(mapearEmpleado(rs));
             }
-
         } catch (SQLException e) {
             System.err.println("Error al consultar empleados: " + e.getMessage());
         }
 
         return lista;
+    }
+
+    public Empleado obtenerPorId(int id) {
+        String sql = "SELECT id, nombre, documento, correo, rol, salario FROM empleados WHERE id = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapearEmpleado(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar empleado por ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Empleado obtenerPorDocumento(String documento) {
+        String sql = "SELECT id, nombre, documento, correo, rol, salario FROM empleados WHERE documento = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, documento);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapearEmpleado(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar empleado por documento: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public boolean actualizar(Empleado empleado) {
+        String sql = "UPDATE empleados SET nombre = ?, documento = ?, correo = ?, rol = ?, salario = ? WHERE id = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, empleado.getNombre());
+            ps.setString(2, empleado.getDocumento());
+            ps.setString(3, empleado.getCorreo());
+            ps.setString(4, empleado.getRol());
+            ps.setDouble(5, empleado.getSalario());
+            ps.setInt(6, empleado.getId());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar empleado: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean eliminar(int id) {
+        String sql = "DELETE FROM empleados WHERE id = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar empleado: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private Empleado mapearEmpleado(ResultSet rs) throws SQLException {
+        return new Empleado(
+                rs.getInt("id"),
+                rs.getString("nombre"),
+                rs.getString("documento"),
+                rs.getString("correo"),
+                rs.getString("rol"),
+                rs.getDouble("salario")
+        );
     }
 }
